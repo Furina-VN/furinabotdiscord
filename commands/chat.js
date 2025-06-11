@@ -1,14 +1,14 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { generateResponse } = require('../config/aiConfig');
-const ayakaHelpers = require('../utils/ayakaHelpers');
+const furinaHelpers = require('../utils/furinaHelpers');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('chat')
-        .setDescription('Chat with Ayaka')
+        .setDescription('Chat with Furina')
         .addStringOption(option =>
             option.setName('message')
-                .setDescription('Your message to Ayaka')
+                .setDescription('Your message to Furina')
                 .setRequired(true)),
 
     async execute(interaction) {
@@ -19,14 +19,14 @@ module.exports = {
 
             const message = interaction.options.getString('message');
             const userLanguage = interaction.client.userLanguage?.get(interaction.user.id) || 'vn';
-            const systemPrompt = ayakaHelpers.getPrompt(userLanguage);
+            const systemPrompt = furinaHelpers.getPrompt(userLanguage);
 
             try {
                 // Get chat context
-                const chatContext = await ayakaHelpers.getChatContext(interaction.user.id);
+                const chatContext = await furinaHelpers.getChatContext(interaction.user.id);
                 
                 // Enhance prompt with context
-                const enhancedPrompt = ayakaHelpers.enhancePromptWithContext(
+                const enhancedPrompt = furinaHelpers.enhancePromptWithContext(
                     systemPrompt,
                     chatContext,
                     message,
@@ -37,7 +37,7 @@ module.exports = {
                 await interaction.editReply(response);
                 
                 // Save chat history
-                await ayakaHelpers.saveChatHistory(
+                await furinaHelpers.saveChatHistory(
                     interaction.user.id,
                     interaction.user.username,
                     message,
@@ -46,7 +46,7 @@ module.exports = {
                 );
             } catch (error) {
                 console.error('Error generating response:', error);
-                const errorMessage = ayakaHelpers.getErrorMessage(userLanguage);
+                const errorMessage = furinaHelpers.getErrorMessage(userLanguage);
                 await interaction.editReply(errorMessage);
             }
         } catch (error) {
@@ -55,15 +55,15 @@ module.exports = {
             try {
                 if (!deferred && !interaction.replied) {
                     await interaction.reply({
-                        content: '❄️ Có lỗi xảy ra khi thực hiện lệnh này!',
+                        content: '💧 Có lỗi xảy ra khi thực hiện lệnh này!',
                         ephemeral: true
                     });
                 } else if (!interaction.replied) {
-                    await interaction.editReply('❄️ Có lỗi xảy ra khi thực hiện lệnh này!');
+                    await interaction.editReply('💧 Có lỗi xảy ra khi thực hiện lệnh này!');
                 }
             } catch (err) {
                 console.error('Error sending fallback error message:', err);
             }
         }
     }
-}; 
+};
