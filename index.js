@@ -96,7 +96,7 @@ client.login(process.env.DISCORD_TOKEN);
 
 // === 8. Express server giữ bot luôn hoạt động (dành cho Render, Replit, v.v.) ===
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
 app.get('/', (req, res) => {
     res.send('🤖 Bot is running!');
