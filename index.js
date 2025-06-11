@@ -91,6 +91,7 @@ client.once(Events.ClientReady, () => {
 });
 
 // === 7. Đăng nhập vào Discord ===
+console.log('🔑 Token hiện tại là:', process.env.DISCORD_TOKEN ? 'Đã nhận được ✅' : 'KHÔNG nhận được ❌');
 client.login(process.env.DISCORD_TOKEN);
 
 // === 8. Express server giữ bot luôn hoạt động (dành cho Render, Replit, v.v.) ===
