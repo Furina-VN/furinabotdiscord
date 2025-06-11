@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
-const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder,MessageFlags } = require('discord.js');
 
 const historyPath = path.join(__dirname, '../data/furina-nsfw_history.json');
 let history = {};
@@ -17,80 +17,53 @@ function saveHistory() {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('furina-nsfw')
-    .setDescription('Hiển thị ảnh Furina (NSFW)'),
+    .setDescription('Hiển thị ảnh Furina (nsfw)'),
 
   async execute(interaction) {
-    if (!interaction.channel.nsfw) {
-      return interaction.reply({
-        content: '⚠️ Dùng lệnh này trong kênh NSFW thôi nhen~',
-        flags: MessageFlags.Ephemeral
-      });
-    }
-
-    await interaction.deferReply();
+  if (!interaction.channel.nsfw) {
+    return interaction.reply({
+      content: '⚠️ Dùng lệnh này trong kênh NSFW thôi nhen~',
+      flags: MessageFlags.Ephemeral // hoặc flags: 64 nếu không muốn import
+    });
+  }
 
     const userId = interaction.user.id;
     const seenIds = history[userId] || [];
 
     try {
-      const query = 'furina_(genshin)';
-      const MAX_PAGES = 20;
-      const MAX_TRIES = 5;
-      let chosen = null;
+      const query = 'furina_(genshin_impact)';
+      const url = `https://api.rule34.xxx/index.php?page=dapi&s=post&q=index&json=1&limit=100&tags=${encodeURIComponent(query)}`;
+      const res = await axios.get(url);
+      const data = res.data;
 
-      for (let i = 0; i < MAX_TRIES; i++) {
-        const randomPage = Math.floor(Math.random() * MAX_PAGES) + 1;
-        const url = `https://yande.re/post.json?limit=100&page=${randomPage}&tags=${encodeURIComponent(query)}`;
-        const res = await axios.get(url);
-        const data = res.data;
-
-        if (!Array.isArray(data) || data.length === 0) continue;
-
-        const unseen = data.filter(post => !seenIds.includes(post.id));
-        if (unseen.length > 0) {
-          chosen = unseen[Math.floor(Math.random() * unseen.length)];
-          history[userId] = [...seenIds, chosen.id];
-          saveHistory();
-          break;
-        }
+      if (!Array.isArray(data) || data.length === 0) {
+        return interaction.reply('😵 Không tìm thấy ảnh Furina nào.');
       }
 
-      // Fallback nếu không có ảnh mới
-      if (!chosen) {
-        const fallbackUrl = `https://yande.re/post.json?limit=100&page=1&tags=${encodeURIComponent(query)}`;
-        const res = await axios.get(fallbackUrl);
-        const data = res.data;
+      const unseen = data.filter(post => !seenIds.includes(post.id));
 
-        if (!Array.isArray(data) || data.length === 0) {
-          return interaction.editReply('😵 Không tìm thấy ảnh Furina nào.');
-        }
-
+      let chosen;
+      if (unseen.length > 0) {
+        chosen = unseen[Math.floor(Math.random() * unseen.length)];
+        history[userId] = [...seenIds, chosen.id];
+        saveHistory();
+      } else {
+        // Nếu đã xem hết thì gửi lại 1 ảnh cũ bất kỳ
         chosen = data[Math.floor(Math.random() * data.length)];
-        await interaction.editReply('👀 Bạn đã xem hết ảnh mới rồi~ Đây là ảnh cũ nè!');
-      }
-
-      // Debug để kiểm tra
-      console.log(`[DEBUG] ID: ${chosen.id}`);
-      console.log(`[DEBUG] file_url: ${chosen.file_url}`);
-      console.log(`[DEBUG] sample_url: ${chosen.sample_url}`);
-
-      const imageUrl = chosen.sample_url || chosen.file_url;
-      if (!imageUrl) {
-        return interaction.editReply('🚫 Không thể lấy ảnh từ Yande.re.');
+        await interaction.reply('👀 Bạn đã xem hết ảnh mới rồi~ Đây là ảnh cũ nè!');
       }
 
       const embed = new EmbedBuilder()
-        .setTitle('📷 Ảnh NSFW Furina')
-        .setImage(imageUrl)
+        .setTitle('📷 Ảnh của Furina de Fontaine')
+        .setImage(chosen.file_url)
         .setURL(`https://discord.gg/jtCrdcvbeR`)
-        .setDescription('Lưu ý: Ảnh có thể load chậm do Internet')
-        .setFooter({ text: `Có thể ảnh không phải NSFW do lọc quá nhiều` });
-       
-      return interaction.editReply({ embeds: [embed] });
+        .setFooter({ text: `Nhấn vào link để xem chi tiết` });
+
+      return interaction.channel.send({ embeds: [embed] });
 
     } catch (err) {
       console.error('[LỖI API]:', err.message);
-      return interaction.editReply('🚫 Có lỗi khi lấy hình ảnh, vui lòng thử lại sau.');
+      return interaction.reply('Có lỗi khi lấy hình ảnh, vui lòng thử lại sau');
     }
   }
-}; 
+};

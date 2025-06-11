@@ -35,20 +35,21 @@ async function getChatContext(userId, limit = 25) {
     try {
         const chatHistoryPath = getUserChatHistoryPath(userId);
         let chatHistory;
-        
+
         try {
             const fileContent = await fs.readFile(chatHistoryPath, 'utf8');
             chatHistory = JSON.parse(fileContent);
         } catch (error) {
-            return [];
+            chatHistory = { chats: [] };
         }
-        
+
         return chatHistory.chats.slice(-limit);
     } catch (error) {
         console.error('Error getting chat context:', error);
         return [];
     }
 }
+
 
 // Function to format chat history for context
 function formatChatContext(chatHistory, language) {
@@ -67,14 +68,18 @@ async function saveChatHistory(userId, username, message, response, language) {
     try {
         const chatHistoryPath = getUserChatHistoryPath(userId);
         let chatHistory;
-        
+
         try {
             const fileContent = await fs.readFile(chatHistoryPath, 'utf8');
             chatHistory = JSON.parse(fileContent);
         } catch (error) {
             chatHistory = { chats: [] };
         }
-        
+
+        if (!Array.isArray(chatHistory.chats)) {
+            chatHistory.chats = [];
+        }
+
         chatHistory.chats.push({
             userId,
             username,
@@ -93,6 +98,7 @@ async function saveChatHistory(userId, username, message, response, language) {
         console.error('Error saving chat history:', error);
     }
 }
+
 
 // Function to enhance prompt with context
 function enhancePromptWithContext(systemPrompt, chatContext, message, language) {

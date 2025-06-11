@@ -29,7 +29,7 @@ async function generateWithGemini(prompt, systemPrompt, language = 'vn') {
         const result = await geminiModel.generateContent({
             contents: [{
                 parts: [{
-                    text: `${systemPrompt}\n\nUser: ${prompt}\nAyaka:`
+                    text: `${systemPrompt}\n\nUser: ${prompt}\nFurina:`
                 }]
             }]
         });
@@ -46,7 +46,7 @@ async function generateWithGemini(prompt, systemPrompt, language = 'vn') {
 async function generateWithDeepInfra(prompt, systemPrompt, apiKey, language = 'vn') {
     try {
         const response = await axios.post(DEEPINFRA_MODEL_URL, {
-            input: `<|begin_of_text|><|start_header_id|>user<|end_header_id|>\n\n${systemPrompt}\n\nUser: ${prompt}\nAyaka:<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n`,
+            input: `<|begin_of_text|><|start_header_id|>user<|end_header_id|>\n\n${systemPrompt}\n\nUser: ${prompt}\nFurina:<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n`,
             stop: ["<|eot_id|>"]
         }, {
             headers: {
