@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { Client, GatewayIntentBits, Collection, REST, Routes, Events,Partials } = require('discord.js');
+const { Client, GatewayIntentBits, Collection, REST, Routes, Events, Partials } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
@@ -12,7 +12,7 @@ const client = new Client({
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.DirectMessages
     ],
-    partials: [Partials.Channel] // Để nhận được tin nhắn từ DM (Direct Message)
+    partials: [Partials.Channel] // Nhận tin nhắn từ DM
 });
 
 // === 2. Load Slash Commands ===
@@ -35,6 +35,7 @@ for (const file of commandFiles) {
 
 // === 3. Đăng ký Slash Commands toàn cục ===
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
+
 (async () => {
     try {
         console.log('🚀 Bắt đầu làm mới các slash command toàn cục...');
@@ -75,7 +76,7 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 });
 
-// === 5. Đăng ký message listener cho cả DM & server ===
+// === 5. Đăng ký listener tin nhắn DM & server ===
 const messageListener = require('./events/messageListener');
 client.on(Events.MessageCreate, async (message) => {
     try {
@@ -85,16 +86,7 @@ client.on(Events.MessageCreate, async (message) => {
     }
 });
 
-// === 6. Sự kiện bot sẵn sàng ===
-client.once(Events.ClientReady, () => {
-    console.log(`🤖 Bot đã đăng nhập với tên: ${client.user.tag}`);
-});
-
-// === 7. Đăng nhập vào Discord ===
-console.log('🔑 Token hiện tại là:', process.env.DISCORD_TOKEN ? 'Đã nhận được ✅' : 'KHÔNG nhận được ❌');
-client.login(process.env.DISCORD_TOKEN);
-
-// === 8. Express server giữ bot luôn hoạt động (dành cho Render, Replit, v.v.) ===
+// === 6. Express server giữ bot sống trên Render ===
 const app = express();
 const PORT = process.env.PORT || 10000;
 
@@ -105,3 +97,17 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
     console.log(`🌐 Express server đang chạy tại cổng ${PORT}`);
 });
+
+// === 7. Đăng nhập bot (và đảm bảo in log đúng trên Render) ===
+async function main() {
+    try {
+        console.log('🔑 Token hiện tại là:', process.env.DISCORD_TOKEN ? 'Đã nhận được ✅' : 'KHÔNG nhận được ❌');
+        await client.login(process.env.DISCORD_TOKEN);
+        console.log(`🤖 Bot đã đăng nhập với tên: ${client.user.tag}`);
+        console.log(`🔗 Mời bot: https://discord.com/oauth2/authorize?client_id=${process.env.CLIENT_ID}&scope=bot+applications.commands&permissions=8`);
+    } catch (err) {
+        console.error('❌ Lỗi khi đăng nhập bot:', err);
+    }
+}
+
+main();
