@@ -1,0 +1,17 @@
+{
+  "name": "furina-discord-bot",
+  "version": "1.0.0",
+  "description": "A Discord bot that simulates Furina de Fontaine from Genshin Impact",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.2.0",
+    "axios": "^1.9.0",
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.4.1",
+    "express": "^5.1.0",
+    "node-fetch": "^3.3.2"
+  }
+}
