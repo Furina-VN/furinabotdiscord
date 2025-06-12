@@ -88,7 +88,7 @@ client.on(Events.MessageCreate, async (message) => {
 
 // === 6. Express server giữ bot sống trên Render ===
 const app = express();
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 10001;
 
 app.get('/', (req, res) => {
     res.send('🤖 Bot is running!');
